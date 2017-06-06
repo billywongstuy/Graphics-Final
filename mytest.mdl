@@ -1,0 +1,12 @@
+basename ztest
+frames 60
+
+push
+
+move 250 250 0
+rotate y 360 spinny
+
+box 0 -100 0 100 100 100
+box 125 0 0 100 200 100
+
+vary spinny 0 59 0 1

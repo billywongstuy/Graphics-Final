@@ -47,6 +47,37 @@ def first_pass( commands ):
     
     return (name, num_frames)
 
+
+"""===================  half_pass ============
+For lighting for shading
+====================="""
+
+def half_pass(commands):
+    lights = {}
+    ambient = [255,255,255]
+    constants = {}
+    shading = 'flat'
+    for command in commands:
+        if command[0] == 'light':
+            r = command[0]
+            g = command[1]
+            b = command[2]
+            x = command[3]
+            y = command[4]
+            z = command[5]
+            lights[x,y,z] = [r,g,b]
+        if command[0] == 'ambient':
+            ambient = [command[0], command[1], command[2]]
+        if command[0] == 'constants':
+            name = command[0]
+            if command[10] != None:
+                constants[name] = [command[1],command[2],command[3],command[4],command[5],command[6],command[7],command[8],command[9],command[10],command[11],command[12]]
+            else:
+                constants[name] = [command[1],command[2],command[3],command[4],command[5],command[6],command[7],command[8],command[9],0,0,0]
+        if command[0] == 'shading':
+            shading = command[1]
+    return (lights,ambient,constants,shading)
+
 """======== second_pass( commands ) ==========
 
   In order to set the knobs for animation, we need to keep
@@ -111,6 +142,14 @@ def run(filename):
         return
 
     (name, num_frames) = first_pass(commands)
+    (lights,ambient,constants,shading) = half_pass(commands)
+
+    setting = {}
+    setting['lights'] = lights
+    setting['ambient'] = ambient
+    setting['shading'] = shading
+    setting['constants'] = constants
+    
     frames = second_pass(commands, num_frames)
     #print frames
     step = 0.1

@@ -69,7 +69,7 @@ def add_polygon( polygons, x0, y0, z0, x1, y1, z1, x2, y2, z2 ):
     add_point(polygons, x1, y1, z1);
     add_point(polygons, x2, y2, z2);
 
-def draw_polygons( matrix, screen, zbuffer, color ):
+def draw_polygons( matrix, screen, zbuffer, color, setting=None ):
     if len(matrix) < 2:
         print 'Need at least 3 points to draw'
         return
