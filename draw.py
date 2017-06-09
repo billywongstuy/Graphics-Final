@@ -4,8 +4,69 @@ from math import *
 from gmath import *
 
 
-def scanline_convert(polygons, i, screen, zbuffer, color):
+def light(matrix,index,ka,kd,ks,normal,setting,color):
+    N = normal
+    n_N = normalize(normal)
+    
+    for i in range(3):
+        
+        #ambience
+        ambient = setting['ambient'][i] * ka[i]
+        color[i] += ambient
 
+        #diffuse and specular
+        for light in setting['lights']:
+            
+            source = setting['lights'][light]['location']
+
+            #print setting['lights'][light]
+            #print source
+            
+            L = vect_add(source,matrix[index],-1)
+            n_L = normalize(L)
+            diffuse = source[i]*kd[i]*max(dot_prod(n_N,n_L),0)
+
+            n_R = normalize(vect_add(vect_scale(n_N,(dot_prod(n_N,n_L)*2)),n_L,-1))
+            view = [0,0,10]
+            n_V = vect_add(matrix[index],view,1)
+
+            specular = source[i]*ks[i]*max(dot_prod(n_R,n_V),0)**1
+
+            #print specular,diffuse
+            
+            color[i] += diffuse+specular
+    color = [int(min(max(c,0),255)) for c in color]
+    #print color
+    return color
+            
+def dot_prod(v1, v2):
+    return v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2]
+
+def vect_add(v1, v2, op):  #op is 1 for add, -1 for subtract
+    return [v1[i]+op*v2[i] for i in range(3)]
+
+def vect_scale(v1,s):
+    return [val*s for val in v1]
+
+def cross_prod(v1, v2):
+    return [v1[1]*v2[2] - v1[2]*v2[1],
+            v1[2]*v2[0] - v1[0]*v2[2],
+            v1[0]*v2[1] - v1[1]*v2[0]]
+
+def magnitude(v):
+    return sqrt(sum(val**2 for val in v))
+    
+def normalize(v):
+    m = magnitude(v)
+    return [val/m for val in v]
+
+
+const = [0.6,0.6,0.6]
+def scanline_convert(polygons, i, screen, zbuffer, color, normal, setting, ka=const, kd=const, ks=const):
+
+    if setting['shading'] == 'flat':
+        color = light(polygons, i, ka, kd, ks, normal, setting, color)
+        
     vertices = sorted([polygons[i],polygons[i+1],polygons[i+2]],key=lambda x:(x[1],x[0]))
     
     lowX = vertices[0][0]
@@ -37,7 +98,7 @@ def scanline_convert(polygons, i, screen, zbuffer, color):
     y = lowY
     i = 0
     while y < topY:
-
+        #print 'draw from ',x0,y,z0,' to ',x1,y,z1,' with color ',color
         draw_line(int(x0),int(y),int(z0),int(x1),int(y),int(z1),screen,zbuffer,color)
                 
         if (y < midY and midY-y < 1):
@@ -63,7 +124,7 @@ def scanline_convert(polygons, i, screen, zbuffer, color):
         y += 1
         z0 += d_z0
         z1 += d_z1
-
+        
 def add_polygon( polygons, x0, y0, z0, x1, y1, z1, x2, y2, z2 ):
     add_point(polygons, x0, y0, z0);
     add_point(polygons, x1, y1, z1);
@@ -85,8 +146,15 @@ def draw_polygons( matrix, screen, zbuffer, color, setting=None ):
         normal = calculate_normal(matrix, point)[:]
         #print normal
         if normal[2] > 0:
-            #scanline_convert(matrix, point, screen, zbuffer, color)
-            scanline_convert(matrix, point, screen, zbuffer, [r,g,b])            
+            #color = [r,g,b]
+
+            start_color = color[:]
+            if len(setting['constants'] > 0):
+                pass
+            
+            scanline_convert(matrix, point, screen, zbuffer, color, normal, setting)
+            color =  [int(min(max(c,0),255)) for c in color]
+            
             draw_line( int(matrix[point][0]),
                        int(matrix[point][1]),
                        matrix[point][2],
@@ -109,6 +177,8 @@ def draw_polygons( matrix, screen, zbuffer, color, setting=None ):
                        matrix[point+2][2],
                        screen, zbuffer, color)
 
+            color = start_color[:]
+            
             r = (r + 33) % 256
             g = (g + 56) % 256
             b = (b + 107) % 256
@@ -324,6 +394,10 @@ def add_point( matrix, x, y, z=0 ):
 
 def draw_line( x0, y0, z0, x1, y1, z1, screen, zbuffer, color ):
 
+    #if any(c > 255 for c in color) or any(type(c) == float for c in color):
+    #    print 'xxxxxxxxxxcolorrrrr', [x0,y0,z0],' to ',[x1,y1,z1]
+    #print 'draw from ',x0,y0,z0,' to ',x1,y1,z1,' with color ',color
+        
     #swap points if going right -> left
     if x0 > x1:
         xt = x0

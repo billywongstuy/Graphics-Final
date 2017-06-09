@@ -54,28 +54,24 @@ For lighting for shading
 
 def half_pass(commands):
     lights = {}
-    ambient = [255,255,255]
+    ambient = [10,10,10]
     constants = {}
-    shading = 'flat'
+    shading = ''
     for command in commands:
-        if command[0] == 'light':
-            r = command[0]
-            g = command[1]
-            b = command[2]
-            x = command[3]
-            y = command[4]
-            z = command[5]
-            lights[x,y,z] = [r,g,b]
-        if command[0] == 'ambient':
-            ambient = [command[0], command[1], command[2]]
-        if command[0] == 'constants':
-            name = command[0]
-            if command[10] != None:
-                constants[name] = [command[1],command[2],command[3],command[4],command[5],command[6],command[7],command[8],command[9],command[10],command[11],command[12]]
-            else:
-                constants[name] = [command[1],command[2],command[3],command[4],command[5],command[6],command[7],command[8],command[9],0,0,0]
-        if command[0] == 'shading':
-            shading = command[1]
+
+        c = commands[command]
+        
+        if c[0] == 'light':
+            info = c[1]
+            lights[command] = info
+        if c[0] == 'ambient':
+            ambient = [c[1], c[2], c[3]]
+        if c[0] == 'shade_type':
+            shading = c[1]
+        if c[0] == 'constants':
+            info = c[1]
+            constants[command] = info
+        
     return (lights,ambient,constants,shading)
 
 """======== second_pass( commands ) ==========
@@ -141,8 +137,13 @@ def run(filename):
         print "Parsing failed."
         return
 
+
+    print commands
+    print '------------------------'
+    print symbols
+    
     (name, num_frames) = first_pass(commands)
-    (lights,ambient,constants,shading) = half_pass(commands)
+    (lights,ambient,constants,shading) = half_pass(symbols)
 
     setting = {}
     setting['lights'] = lights
@@ -189,19 +190,19 @@ def run(filename):
                         args[0], args[1], args[2],
                         args[3], args[4], args[5])
                 matrix_mult( stack[-1], tmp )
-                draw_polygons(tmp, screen, zb, color)
+                draw_polygons(tmp, screen, zb, color, setting)
                 tmp = []
             elif c == 'sphere':
                 add_sphere(tmp,
                            args[0], args[1], args[2], args[3], step)
                 matrix_mult( stack[-1], tmp )
-                draw_polygons(tmp, screen, zb, color)
+                draw_polygons(tmp, screen, zb, color, setting)
                 tmp = []
             elif c == 'torus':
                 add_torus(tmp,
                           args[0], args[1], args[2], args[3], args[4], step)
                 matrix_mult( stack[-1], tmp )
-                draw_polygons(tmp, screen, zb, color)
+                draw_polygons(tmp, screen, zb, color, setting)
                 tmp = []
             elif c == 'move':
                 if command[-1]:
