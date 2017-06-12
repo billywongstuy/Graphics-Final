@@ -18,18 +18,19 @@ def light(matrix,index,ka,kd,ks,normal,setting,color):
         for light in setting['lights']:
             
             source = setting['lights'][light]['location']
-
+            col = setting['lights'][light]['color']
+            
             #print setting['lights'][light]
             #print source
             
             L = vect_add(source,matrix[index],-1)
             n_L = normalize(L)
-            diffuse = source[i]*kd[i]*max(dot_prod(n_N,n_L),0)
+            diffuse = col[i]*kd[i]*max(dot_prod(n_N,n_L),0)
             
             n_R = normalize(vect_add(vect_scale(n_N,(dot_prod(n_N,n_L)*2)),n_L,-1))
             n_V = [0,0,1]
             
-            specular = source[i]*ks[i]*max(dot_prod(n_R,n_V),0)**1
+            specular = col[i]*ks[i]*max(dot_prod(n_R,n_V),0)**1
             
             #print diffuse, specular
             
