@@ -25,14 +25,13 @@ def light(matrix,index,ka,kd,ks,normal,setting,color):
             L = vect_add(source,matrix[index],-1)
             n_L = normalize(L)
             diffuse = source[i]*kd[i]*max(dot_prod(n_N,n_L),0)
-
+            
             n_R = normalize(vect_add(vect_scale(n_N,(dot_prod(n_N,n_L)*2)),n_L,-1))
-            view = [0,0,10]
-            n_V = vect_add(matrix[index],view,1)
-
+            n_V = [0,0,1]
+            
             specular = source[i]*ks[i]*max(dot_prod(n_R,n_V),0)**1
-
-            #print specular,diffuse
+            
+            #print diffuse, specular
             
             color[i] += diffuse+specular
     color = [int(min(max(c,0),255)) for c in color]
@@ -63,7 +62,7 @@ def normalize(v):
 
 const = [0.6,0.6,0.6]
 def scanline_convert(polygons, i, screen, zbuffer, color, normal, setting, ka=const, kd=const, ks=const):
-
+    
     if setting['shading'] == 'flat':
         color = light(polygons, i, ka, kd, ks, normal, setting, color)
         
@@ -149,8 +148,8 @@ def draw_polygons( matrix, screen, zbuffer, color, setting=None ):
             #color = [r,g,b]
 
             start_color = color[:]
-            if len(setting['constants'] > 0):
-                pass
+            #if len(setting['constants'] > 0):
+            #    pass
             
             scanline_convert(matrix, point, screen, zbuffer, color, normal, setting)
             color =  [int(min(max(c,0),255)) for c in color]
