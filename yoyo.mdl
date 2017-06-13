@@ -8,17 +8,15 @@ frames 55
 
 push
 
-move 280 276 0
+move 250 250 0
 scale 1.5 1.5 1.5
 rotate z -45
 
-box -35 100 36 50 100 35
 
-scale 1 0.75 1
-sphere 0 0 0 35 
-
+sphere 0 0 0 35
 
 pop
+
 
 
 push
