@@ -126,6 +126,7 @@ def run(filename):
     This function runs an mdl script
     """
     color = [0, 0, 0]
+    
     tmp = new_matrix()
     ident( tmp )
 
@@ -138,9 +139,9 @@ def run(filename):
         return
 
 
-    print commands
-    print '------------------------'
-    print symbols
+    #print commands
+    #print '------------------------'
+    #print symbols
     
     (name, num_frames) = first_pass(commands)
     (lights,ambient,constants,shading) = half_pass(symbols)
@@ -213,8 +214,14 @@ def run(filename):
                 tmp = []
             elif c == 'scale':
                 if command[-1]:
-                    knob_value = symbols[command[-1]][1]                
-                tmp = make_scale(args[0] * knob_value, args[1] * knob_value, args[2] * knob_value)
+                    knob_value = symbols[command[-1]][1]
+
+                    args = [arg for arg in args]
+                    for a in range(3):
+                        if args[a] != -1:
+                            args[a] *= knob_value
+                    
+                tmp = make_scale(args[0], args[1], args[2])
                 matrix_mult(stack[-1], tmp)
                 stack[-1] = [x[:] for x in tmp]
                 tmp = []
